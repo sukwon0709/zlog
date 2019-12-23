@@ -263,10 +263,12 @@ static int zlog_spec_write_usrmsg(zlog_spec_t * a_spec, zlog_thread_t * a_thread
 			goto zlog_hex_exit;
 		}
 
+#if 0  // UCPHP	
 		rc = zlog_buf_append(a_buf, ZLOG_HEX_HEAD, sizeof(ZLOG_HEX_HEAD)-1);
 		if (rc) {
 			goto zlog_hex_exit;
 		}
+#endif
 
 		line_offset = 0;
 		byte_offset = 0;
@@ -274,6 +276,7 @@ static int zlog_spec_write_usrmsg(zlog_spec_t * a_spec, zlog_thread_t * a_thread
 		while (1) {
 			unsigned char c;
 
+#if 0  // UCPHP
 			rc = zlog_buf_append(a_buf, "\n", 1);
 			if (rc)  goto zlog_hex_exit;
 
@@ -298,12 +301,13 @@ static int zlog_spec_write_usrmsg(zlog_spec_t * a_spec, zlog_thread_t * a_thread
 
 			rc = zlog_buf_append(a_buf, "  ", 2);
 			if (rc) goto zlog_hex_exit;
+#endif
 
 			for (byte_offset = 0; byte_offset < 16; byte_offset++) {
 				if (line_offset * 16 + byte_offset < a_thread->event->hex_buf_len) {
 					c = *((unsigned char *)a_thread->event->hex_buf
 						+ line_offset * 16 + byte_offset);
-					if (c >= 32 && c <= 126) {
+					if (c == 9 || c == 10 || (c >= 32 && c <= 126)) {    // XXX(soh): added newline and tab
 						rc = zlog_buf_append(a_buf,(char*)&c, 1);
 						if (rc)  goto zlog_hex_exit;
 					} else {
